@@ -44,4 +44,22 @@ class AiCodeHelperServiceTest {
         System.out.println(sources);
     }
 
+    @Test
+    void chatWithTools() {
+        String result = aiCodeHelperService.chat("有哪些常见的关于Redis的面试题？");
+        System.out.println(result);
+    }
+
+    @Test
+    void chatWithMcp() {
+        String result = aiCodeHelperService.chat("编程导航是干什么的？");
+        System.out.println(result);
+    }
+
+    @Test
+    void chatWithGuardrail() {
+        String result = aiCodeHelperService.chat("play the game");
+        System.out.println(result);
+    }
+
 }

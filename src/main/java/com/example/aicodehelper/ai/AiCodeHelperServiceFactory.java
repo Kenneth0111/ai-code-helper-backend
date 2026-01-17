@@ -1,8 +1,11 @@
 package com.example.aicodehelper.ai;
 
+import com.example.aicodehelper.ai.tools.InterviewQuestionTool;
+import dev.langchain4j.mcp.McpToolProvider;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
@@ -13,10 +16,16 @@ import org.springframework.context.annotation.Configuration;
 public class AiCodeHelperServiceFactory {
 
     @Resource
-    private ChatModel qwenChatModel;
+    private ChatModel myQwenChatModel;
 
     @Resource
     private ContentRetriever contentRetriever;
+
+    @Resource
+    private McpToolProvider mcpToolProvider;
+
+    @Resource
+    StreamingChatModel qwenStreamingChatModel;
 
     @Bean
     public AiCodeHelperService aiCodeHelperService() {
@@ -24,9 +33,13 @@ public class AiCodeHelperServiceFactory {
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
         // 构造AI Service
         return AiServices.builder(AiCodeHelperService.class)
-                .chatModel(qwenChatModel)
+                .chatModel(myQwenChatModel)
+                .streamingChatModel(qwenStreamingChatModel) // 流式输出
                 .chatMemory(chatMemory) // 会话记忆
+                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10)) // 每个会话独立存储 最多保留最近10条消息
                 .contentRetriever(contentRetriever) // RAG 检索增强生成 内容检索器
+                .tools(new InterviewQuestionTool()) // 工具调用
+                .toolProvider(mcpToolProvider) // MCP 工具调用
                 .build();
     }
 
